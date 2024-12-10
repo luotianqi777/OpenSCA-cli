@@ -38,6 +38,7 @@ type OptionalConfig struct {
 	DirOnly     bool   `json:"dir"`
 	VulnOnly    bool   `json:"vuln"`
 	SaveDev     bool   `json:"dev"`
+	DirectOnly  bool   `json:"direct"`
 	ProgressBar bool   `json:"progress"`
 	TLSVerify   bool   `json:"tls"`
 	Proxy       string `json:"proxy"`

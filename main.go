@@ -63,14 +63,35 @@ func main() {
 	// 运行检测任务
 	result := opensca.RunTask(context.Background(), arg)
 
+	// 删掉空结果
+	for i := 0; i < len(result.Deps); {
+		dep := result.Deps[i]
+		if len(dep.Children) == 0 && dep.Name == "" {
+			result.Deps = append(result.Deps[:i], result.Deps[i+1:]...)
+		} else {
+			i++
+		}
+	}
+
+	// 是否仅保留直接依赖
+	if config.Conf().Optional.DirectOnly {
+		for _, dep := range result.Deps {
+			dep.ForEachNode(func(p, n *model.DepGraph) bool {
+				if !n.Direct {
+					p.RemoveChild(n)
+					return false
+				}
+				return true
+			})
+		}
+	}
+
 	// 日志中记录检测结果
 	if result.Error != nil {
 		logs.Error(result.Error)
 	}
 	for _, dep := range result.Deps {
-		if dep.Name != "" || len(dep.Children) > 0 {
-			logs.Debugf("dependency tree:\n%s", dep.Tree(false, false))
-		}
+		logs.Debugf("dependency tree:\n%s", dep.Tree(false, false))
 	}
 
 	// 生成报告
